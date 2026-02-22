@@ -20,24 +20,18 @@ jobs:
 
       - name: Build (rootful)
         env:
-          THEOS_PLATFORM_SDK_ROOT: ${{ github.workspace }}/theos/sdks/iPhoneOS14.5.sdk
           ARCHS: "arm64"
         run: |
           make clean package
-          ls -al
-          find . -name '*.deb'
           mkdir -p build/rootful
           mv ./packages/*.deb build/rootful/ || true
 
       - name: Build (rootless)
         env:
-          THEOS_PLATFORM_SDK_ROOT: ${{ github.workspace }}/theos/sdks/iPhoneOS15.6.sdk
           THEOS_PACKAGE_SCHEME: rootless
           ARCHS: "arm64"
         run: |
           make clean package
-          ls -al
-          find . -name '*.deb'
           mkdir -p build/rootless
           mv ./packages/*.deb build/rootless/ || true
 
