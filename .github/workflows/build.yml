@@ -1,16 +1,54 @@
-name: Build Rose
+name: Build with Theos
+
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - '**'
+  pull_request:
 
 jobs:
   build:
     runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Build with Theos
-        uses: theos/theos-action@v1
-      - name: Upload deb
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Theos
+        uses: Randomblock1/theos-action@v1
+
+      - name: Build (rootful)
+        env:
+          THEOS_PLATFORM_SDK_ROOT: ${{ github.workspace }}/theos/sdks/iPhoneOS10.3.sdk
+          ARCHS: "arm64 armv7"
+        run: |
+           make clean package
+           ls -al
+           find . -name '*.deb'
+           mkdir -p build/rootful
+           mv ./packages/*.deb build/rootful/ || true
+
+      - name: Build (rootless)
+        env:
+          THEOS_PLATFORM_SDK_ROOT: ${{ github.workspace }}/theos/sdks/iPhoneOS15.6.sdk
+          THEOS_PACKAGE_SCHEME: rootless
+          ARCHS: "arm64"
+        run: |
+           make clean package
+           ls -al
+           find . -name '*.deb'
+           mkdir -p build/rootless
+           mv ./packages/*.deb build/rootless/ || true
+
+      - name: Upload Artifacts (rootful)
         uses: actions/upload-artifact@v4
         with:
-          name: Rose-Tweak
-          path: packages/*.deb
+          name: rootful-build
+          path: build/rootful/*.deb
+
+      - name: Upload Artifacts (rootless)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rootless-build
+          path: build/rootless/*.deb
