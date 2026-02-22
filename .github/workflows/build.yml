@@ -1,0 +1,16 @@
+name: Build Rose
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build with Theos
+        uses: theos/theos-action@v1
+      - name: Upload deb
+        uses: actions/upload-artifact@v3
+        with:
+          name: Rose-Tweak
+          path: packages/*.deb
